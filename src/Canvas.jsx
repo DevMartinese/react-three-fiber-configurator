@@ -1,7 +1,9 @@
 import { useRef } from 'react';
 import { easing } from 'maath';
+import { state } from './store';
+import { useSnapshot } from 'valtio';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { AccumulativeShadows, Center, Environment, RandomizedLight, useGLTF } from '@react-three/drei';
+import { AccumulativeShadows, Center, Environment, RandomizedLight, Decal, useGLTF, useTexture } from '@react-three/drei';
 
 export const App = ({ position = [0, 0, 2.5], fov = 25 }) => (
   <Canvas
@@ -12,7 +14,7 @@ export const App = ({ position = [0, 0, 2.5], fov = 25 }) => (
     <ambientLight intensity={0.5} />
     <Environment preset='apartment' />
     <CameraRig>
-    <Backdrop />
+      <Backdrop />
       <Center>
         <Shirt />
       </Center>
@@ -21,22 +23,51 @@ export const App = ({ position = [0, 0, 2.5], fov = 25 }) => (
 );
 
 function Shirt(props) {
+  const snap = useSnapshot(state);
+
+  const texture = useTexture(`/${snap.selectedDecal}.png`)
+
   const { nodes, materials } = useGLTF('/shirt_baked_collapsed.glb');
+
+  useFrame((state, delta) => {
+    easing.dampC(materials.lambert1.color, snap.selectedColor, 0.25, delta)
+  });
+
   return (
-    <group {...props} dispose={null}>
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes.T_Shirt_male.geometry}
-        material={materials.lambert1}
+    <mesh
+      castShadow
+      geometry={nodes.T_Shirt_male.geometry}
+      material={materials.lambert1}
+      material-roughness={1}
+      {...props}
+      dispose={null}
+    >
+      <Decal
+        position={[0, 0.04, 0.15]}
+        rotation={[0, 0, 0]}
+        scale={0.15}
+        opacity={0.7}
+        map={texture}
       />
-    </group>
+    </mesh>
   )
 }
 
 function Backdrop() {
+  const shadows = useRef()
+
+  useFrame((state, delta) =>
+    easing.dampC(
+      shadows.current.getMesh().material.color,
+      state.selectedColor,
+      0.25,
+      delta
+    )
+  )
+
   return (
     <AccumulativeShadows
+      ref={shadows}
       temporal
       frames={60}
       alphaTest={0.85}
@@ -67,9 +98,9 @@ function CameraRig({ children }) {
   useFrame((state, delta) => {
     easing.dampE(
       group.current.rotation,
-       [state.pointer.y / 10, -state.pointer.x / 5, 0],
-       0.25,
-       delta
+      [state.pointer.y / 10, -state.pointer.x / 5, 0],
+      0.25,
+      delta
     )
   })
 
@@ -78,4 +109,5 @@ function CameraRig({ children }) {
   )
 }
 
-useGLTF.preload('/shirt_baked_collapsed.glb')
+useGLTF.preload('/shirt_baked_collapsed.glb');
+['/react.png', '/three2.png', '/pmndrs.png'].forEach(useTexture.preload)

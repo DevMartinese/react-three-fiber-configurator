@@ -47,7 +47,7 @@ function Intro() {
                 customization tool. <strong>Unleash your imagination</strong>{' '}
                 and define your own style.
               </p>
-              <button 
+              <button
                 style={{ background: 'black' }}
                 onClick={() => {
                   state.intro = false;
@@ -64,42 +64,38 @@ function Intro() {
 }
 
 function Customizer() {
-  const colors = [
-    '#ccc',
-    '#EFBD4E',
-    '#80C670',
-    '#726DE8',
-    '#EF674E',
-    '#353934',
-    'Purple'
-  ]
-  const decals = ['react', 'three2', 'pmndrs']
+  const snap = useSnapshot(state);
 
   return (
     <section key="custom">
       <div className="customizer">
         <div className="color-options">
-          {colors.map((color) => (
+          {snap.colors.map((color) => (
             <div
               key={color}
               className="circle"
-              style={{ background: color }}></div>
+              style={{ background: color }}
+              onClick={() => { state.selectedColor = color }}></div>
           ))}
         </div>
         <div className="decals">
           <div className="decals--container">
-            {decals.map((decal) => (
-              <div key={decal} className="decal">
+            {snap.decals.map((decal) => (
+              <div
+                key={decal}
+                className="decal"
+                onClick={() => { state.selectedDecal = decal }}
+              >
                 <img src={decal + '_thumb.png'} alt="brand" />
               </div>
             ))}
           </div>
         </div>
-        <button className="share" style={{ background: 'black' }}>
+        <button className="share" style={{ background: snap.selectedColor }}>
           DOWNLOAD
           <AiFillCamera size="1.3em" />
         </button>
-        <button className="exit" style={{ background: 'black' }} onClick={() => {state.intro = true}}>
+        <button className="exit" style={{ background: snap.selectedColor }} onClick={() => { state.intro = true }}>
           GO BACK
           <AiOutlineArrowLeft size="1.3em" />
         </button>
