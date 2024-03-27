@@ -1,19 +1,29 @@
-import { useRef } from 'react';
-import { easing } from 'maath';
-import { state } from './store';
-import { useSnapshot } from 'valtio';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { AccumulativeShadows, Center, Environment, RandomizedLight, Decal, useGLTF, useTexture } from '@react-three/drei';
+import { useRef } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { easing } from 'maath'
+
+import {
+  useGLTF,
+  Environment,
+  Center,
+  AccumulativeShadows,
+  RandomizedLight,
+  useTexture,
+  Decal
+} from '@react-three/drei'
+import { useSnapshot } from 'valtio'
+import { state } from './store'
 
 export const App = ({ position = [0, 0, 2.5], fov = 25 }) => (
   <Canvas
     shadows
     gl={{ preserveDrawingBuffer: true }}
+    camera={{ position, fov }}
     eventSource={document.getElementById('root')}
-    eventPrefix='client'
-    camera={{ position, fov }}>
+    eventPrefix="client">
     <ambientLight intensity={0.5} />
-    <Environment preset='apartment' />
+    <Environment files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/potsdamer_platz_1k.hdr" />
+
     <CameraRig>
       <Backdrop />
       <Center>
@@ -21,18 +31,18 @@ export const App = ({ position = [0, 0, 2.5], fov = 25 }) => (
       </Center>
     </CameraRig>
   </Canvas>
-);
+)
 
 function Shirt(props) {
-  const snap = useSnapshot(state);
+  const snap = useSnapshot(state)
 
   const texture = useTexture(`/${snap.selectedDecal}.png`)
 
-  const { nodes, materials } = useGLTF('/shirt_baked_collapsed.glb');
+  const { nodes, materials } = useGLTF('/shirt_baked_collapsed.glb')
 
-  useFrame((state, delta) => {
+  useFrame((state, delta) =>
     easing.dampC(materials.lambert1.color, snap.selectedColor, 0.25, delta)
-  });
+  )
 
   return (
     <mesh
@@ -41,8 +51,7 @@ function Shirt(props) {
       material={materials.lambert1}
       material-roughness={1}
       {...props}
-      dispose={null}
-    >
+      dispose={null}>
       <Decal
         position={[0, 0.04, 0.15]}
         rotation={[0, 0, 0]}
@@ -94,8 +103,9 @@ function Backdrop() {
 }
 
 function CameraRig({ children }) {
-  const group = useRef();
-  const snap = useSnapshot(state);
+  const group = useRef()
+
+  const snap = useSnapshot(state)
 
   useFrame((state, delta) => {
     easing.damp3(
@@ -111,10 +121,7 @@ function CameraRig({ children }) {
       delta
     )
   })
-
-  return (
-    <group ref={group} >{children}</group>
-  )
+  return <group ref={group}>{children}</group>
 }
 
 useGLTF.preload('/shirt_baked_collapsed.glb');

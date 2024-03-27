@@ -84,7 +84,7 @@ section {
 
 .section--container h1 {
   font-weight: 900;
-  font-size: 16vw;
+  font-size: 20vh;
   letter-spacing: -6px;
   font-style: italic;
   width: 30%;
@@ -214,7 +214,6 @@ button:hover {
 }
 
 /* MOBILE ADJUSTMENTS */
-
 @media screen and (max-width: 600px) {
   .section--container {
     margin-left: 15vw;
